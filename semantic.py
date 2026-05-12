@@ -1,63 +1,42 @@
-# =========================================================
-# SEMANTIC ANALYZER
-# =========================================================
-
 class SemanticAnalyzer:
 
     def __init__(self):
-
-        # store declared variables
+        # variable types (unknown by default)
         self.symbol_table = set()
-
-
-    # =====================================================
-    # visit AST
-    # =====================================================
 
     def visit(self, node):
 
         if node is None:
-            return
+            return None
 
-
-        # leaf node (number or variable)
+        # -------------------------
+        # LEAF NODE
+        # -------------------------
         if node.left is None and node.right is None:
 
-            # if it's a number → OK
+            # number literal
             if node.value.replace('.', '', 1).isdigit():
-
                 return "NUMBER"
 
-
-            # variable
+            # identifier (VARIABLE)
             if node.value.isidentifier():
-
-                if node.value not in self.symbol_table:
-
-                    raise Exception(
-                        f"Semantic Error: variable '{node.value}' is not defined"
-                    )
-
                 return "IDENTIFIER"
 
+        # -------------------------
+        # BINARY OPERATION
+        # -------------------------
+        left = self.visit(node.left)
+        right = self.visit(node.right)
 
-        # binary operation
-        left_type = self.visit(node.left)
-
-        right_type = self.visit(node.right)
-
-
-        # type checking rules (simple)
         if node.value in ['+', '-', '*', '/']:
 
-            if left_type != right_type:
-
+            # STRICT RULES (THIS IS WHAT YOU WANT)
+            if left != "NUMBER" or right != "NUMBER":
                 raise Exception(
                     f"Type Error: cannot apply '{node.value}' "
-                    f"between {left_type} and {right_type}"
+                    f"between {left} and {right}"
                 )
 
-            return left_type
-
+            return "NUMBER"
 
         return None
